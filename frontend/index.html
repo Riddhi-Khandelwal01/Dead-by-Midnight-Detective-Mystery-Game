@@ -1,0 +1,177 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Dead by Midnight</title>
+
+    <!-- Google font -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- CSS file -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<!-- Landing screen -->
+<main class="landing-page" id="landingPage">
+
+    <p class="subtitle">THE RAVENSCROFT CASE</p>
+
+    <h1>
+        DEAD BY
+        <span>MIDNIGHT</span>
+    </h1>
+
+    <p class="tagline">
+        One mansion. Four suspects. Forty moves.
+    </p>
+
+    <button id="startButton">
+        BEGIN INVESTIGATION
+    </button>
+
+    <p class="footer-text">
+        EVERY SECRET HAS A PRICE.
+    </p>
+
+</main>
+
+<!-- Story introduction screen -->
+<section class="story-page hidden" id="storyPage">
+
+    <p class="subtitle">10:30 PM — RAVENSCROFT MANSION</p>
+
+    <h2>A LETTER BEFORE MIDNIGHT</h2>
+
+    <p>
+        Ten years ago, you closed the mysterious case
+        of Eleanor Ravenscroft's death.
+    </p>
+
+    <p>
+        Tonight, Lord Ravenscroft has summoned you
+        to his mansion with a chilling message.
+    </p>
+
+    <blockquote>
+        "Detective, I fear I will not live to see midnight."
+    </blockquote>
+
+    <p>
+        Suddenly, the doors lock.
+        Four suspects remain inside.
+        You have forty moves to uncover the truth.
+    </p>
+
+    <button id="enterMansion">
+        ENTER THE MANSION
+    </button>
+
+</section>
+
+<!-- Main game dashboard -->
+<section class="game-page hidden" id="gamePage">
+
+    <header class="game-header">
+        <h2>RAVENSCROFT MANSION</h2>
+        <p>THE NIGHT OF THE TRUTH</p>
+    </header>
+
+    <!-- Player statistics -->
+    <div class="stats">
+
+        <div class="stat-box">
+            <span>MOVES LEFT</span>
+            <h3 id="moves">40</h3>
+        </div>
+
+        <div class="stat-box">
+            <span>LIVES</span>
+            <h3 id="lives">3</h3>
+        </div>
+
+        <div class="stat-box">
+            <span>SCORE</span>
+            <h3 id="score">0</h3>
+        </div>
+
+    </div>
+
+    <h2 class="section-title">CHOOSE YOUR DESTINATION</h2>
+
+    <!-- Mansion rooms -->
+    <div class="room-container">
+
+        <div class="room-card">
+            <h3>THE STUDY</h3>
+            <p>Where Lord Ravenscroft was last seen.</p>
+            <button id="exploreStudy">EXPLORE</button>
+        </div>
+        <!-- Study investigation panel -->
+<div class="room-investigation hidden" id="studyPanel">
+
+    <h2>THE STUDY</h2>
+
+    <p>
+        The room is silent. A half-burnt letter lies
+        on Lord Ravenscroft's desk.
+    </p>
+
+    <button id="inspectDesk">INSPECT THE DESK</button>
+
+    <div id="clueResult"></div>
+
+    <button id="backToRooms">BACK TO ROOMS</button>
+
+</div>
+
+        <div class="room-card">
+            <h3>THE LIBRARY</h3>
+            <p>Among books lie forgotten secrets.</p>
+            <button disabled>LOCKED</button>
+        </div>
+
+        <div class="room-card">
+            <h3>THE LABORATORY</h3>
+            <p>Something suspicious was discovered here.</p>
+            <button disabled>LOCKED</button>
+        </div>
+
+        <div class="room-card">
+            <h3>THE SECRET ROOM</h3>
+            <p>A room that was never meant to be found.</p>
+            <button disabled>LOCKED</button>
+        </div>
+
+    </div>
+
+    <footer class="game-footer">
+    <button id="inventoryButton">INVENTORY</button>
+    <button id="journalButton">DETECTIVE JOURNAL</button>
+</footer>
+
+<!-- Inventory panel -->
+<div class="info-panel hidden" id="inventoryPanel">
+    <h2>YOUR INVENTORY</h2>
+    <ul id="inventoryList"></ul>
+    <button id="closeInventory">CLOSE</button>
+</div>
+
+<!-- Journal panel -->
+<div class="info-panel hidden" id="journalPanel">
+    <h2>DETECTIVE JOURNAL</h2>
+    <ul id="journalList"></ul>
+    <button id="closeJournal">CLOSE</button>
+</div>
+
+</section>
+
+
+    <script src="script.js"></script>
+
+</body>
+</html>
