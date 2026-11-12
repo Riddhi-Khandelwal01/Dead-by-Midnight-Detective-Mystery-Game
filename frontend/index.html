@@ -197,9 +197,10 @@
 
 
         <!-- ===================================================== -->
-        <!-- STUDY INVESTIGATION PANEL                              -->
-        <!-- (Later we will replace this with one generic room      -->
-        <!--  panel that works for all four rooms.)                 -->
+        <!-- OLD STUDY INVESTIGATION PANEL                          -->
+        <!-- Kept for now so the current game keeps working.        -->
+        <!-- It will be removed after the generic room panel below  -->
+        <!-- is fully working and tested.                           -->
         <!-- ===================================================== -->
 
         <div class="room-investigation hidden" id="studyPanel">
@@ -219,6 +220,69 @@
             <div id="clueResult"></div>
 
             <button id="backToRooms">
+                BACK TO ROOMS
+            </button>
+
+        </div>
+
+
+        <!-- ===================================================== -->
+        <!-- NEW: GENERIC ROOM PANEL                                -->
+        <!-- One panel that works for ALL four rooms.               -->
+        <!-- JavaScript will fill in the room name, intro text,     -->
+        <!-- object buttons and puzzle using the data in data.js.   -->
+        <!-- It stays hidden until the new room system is built.    -->
+        <!-- ===================================================== -->
+
+        <div class="room-investigation hidden" id="roomPanel">
+
+            <!-- Filled by JavaScript from ROOMS[...].name -->
+            <h2 id="roomTitle"></h2>
+
+            <!-- Filled by JavaScript from ROOMS[...].intro -->
+            <p id="roomIntro"></p>
+
+            <!-- JavaScript adds one button per inspectable object -->
+            <div id="objectList"></div>
+
+            <!-- Shows "CLUE FOUND" messages and warnings -->
+            <div id="roomResult"></div>
+
+            <!-- Puzzle area: only shown in rooms that have a puzzle -->
+            <div id="puzzleArea" class="hidden">
+
+                <h3 id="puzzleTitle"></h3>
+
+                <p id="puzzleStory"></p>
+
+                <p id="puzzleQuestion"></p>
+
+                <input
+                    type="text"
+                    id="puzzleInput"
+                    placeholder="Type your answer here"
+                    autocomplete="off"
+                >
+
+                <div>
+                    <button id="submitPuzzle">
+                        SUBMIT ANSWER
+                    </button>
+
+                    <button id="hintButton">
+                        USE HINT (1 MOVE)
+                    </button>
+                </div>
+
+                <!-- Hint text appears here after the hint is used -->
+                <p id="puzzleHintText"></p>
+
+                <!-- Success or failure message for the puzzle -->
+                <div id="puzzleResult"></div>
+
+            </div>
+
+            <button id="roomBackButton">
                 BACK TO ROOMS
             </button>
 
@@ -295,14 +359,38 @@
 
 
         <!-- ===================================================== -->
-        <!-- PLACEHOLDER: SUSPECTS PANEL (built in a later step)    -->
+        <!-- SUSPECTS PANEL                                         -->
+        <!-- It has two views:                                      -->
+        <!--   1. suspectList      = the four suspect cards         -->
+        <!--   2. interrogationView = one suspect's profile and     -->
+        <!--                          their questions               -->
+        <!-- JavaScript will show one and hide the other.           -->
         <!-- ===================================================== -->
 
         <div class="info-panel hidden" id="suspectsPanel">
 
             <h2>THE SUSPECTS</h2>
 
+            <!-- View 1: list of suspects (filled by JavaScript) -->
             <div id="suspectList"></div>
+
+            <!-- View 2: interrogation of one suspect -->
+            <div class="hidden" id="interrogationView">
+
+                <!-- Name, role, description and statement -->
+                <div id="suspectProfile"></div>
+
+                <!-- One button per interrogation question -->
+                <div id="questionList"></div>
+
+                <!-- The suspect's answer appears here -->
+                <div id="answerBox"></div>
+
+                <button id="backToSuspects">
+                    BACK TO SUSPECTS
+                </button>
+
+            </div>
 
             <button id="closeSuspects">
                 CLOSE
@@ -312,7 +400,7 @@
 
 
         <!-- ===================================================== -->
-        <!-- PLACEHOLDER: ACCUSATION PANEL (built in a later step)  -->
+        <!-- ACCUSATION PANEL (content built in a later step)       -->
         <!-- ===================================================== -->
 
         <div class="info-panel hidden" id="accusationPanel">
@@ -331,7 +419,7 @@
 
 
     <!-- ===================================================== -->
-    <!-- SCREEN 4: ENDING (correct, incorrect, out of moves)    -->
+    <!-- SCREEN 4: ENDING (correct, incorrect, out of lives)    -->
     <!-- Hidden until the game finishes.                        -->
     <!-- ===================================================== -->
 
@@ -343,6 +431,9 @@
 
         <div id="endingText"></div>
 
+        <!-- The true murder timeline is shown here in the ending -->
+        <div id="endingTimeline"></div>
+
         <button id="playAgainButton">
             PLAY AGAIN
         </button>
@@ -350,7 +441,15 @@
     </section>
 
 
-    <!-- JavaScript file -->
+    <!-- ===================================================== -->
+    <!-- JAVASCRIPT FILES                                       -->
+    <!-- ORDER MATTERS: the data files must load FIRST so that  -->
+    <!-- ROOMS, TIMELINE, GAME_CONFIG and SUSPECTS already exist -->
+    <!-- when script.js starts running.                         -->
+    <!-- ===================================================== -->
+
+    <script src="js/data.js"></script>
+    <script src="js/suspects.js"></script>
     <script src="script.js"></script>
 
 </body>

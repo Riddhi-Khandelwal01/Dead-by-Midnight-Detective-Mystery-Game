@@ -5,7 +5,7 @@
    Table of contents:
    1.  Colour and font variables
    2.  Global settings
-   3.  Buttons
+   3.  Buttons and text inputs
    4.  Landing page
    5.  Story page (also used for endings)
    6.  Game dashboard
@@ -14,9 +14,16 @@
    9.  Room investigation panel
    10. Footer menu buttons
    11. Info panels (inventory, journal, suspects, accusation)
-   12. Animations
-   13. Responsive design (tablet and mobile)
-   14. Reduced motion (accessibility)
+   12. Locked and unlocked room cards          (NEW)
+   13. Generic room panel: objects and messages (NEW)
+   14. Puzzle area                              (NEW)
+   15. Clue display (room, inventory, journal)  (NEW)
+   16. Suspects and interrogation               (NEW)
+   17. Accusation panel                         (NEW)
+   18. Ending screen and timeline               (NEW)
+   19. Animations
+   20. Responsive design (tablet and mobile)
+   21. Reduced motion (accessibility)
 ========================================= */
 
 
@@ -40,6 +47,12 @@
 
     --border-dark: #51403b;    /* quiet borders */
     --border-mid: #6b5141;     /* stronger borders */
+
+    /* NEW: muted colours for success, warning and danger.
+       They are soft so they fit the gothic mood. */
+    --success: #9bb48a;        /* muted sage green */
+    --danger: #c1666b;         /* muted blood red */
+    --burgundy-bright: #8a3a45;/* accent for confrontation questions */
 
     --font-title: 'Cinzel', serif;
     --font-body: 'Playfair Display', serif;
@@ -82,14 +95,19 @@ body::before {
 }
 
 /* Hide inactive screens and panels.
-   JavaScript adds or removes this class. */
-.hidden {
+   JavaScript adds or removes the "hidden" class.
+   !important makes sure no other rule (for example a
+   grid or flex rule) can accidentally show it again.
+   We also cover the HTML "hidden" attribute, in case
+   we ever use <div hidden> instead of class="hidden". */
+.hidden,
+[hidden] {
     display: none !important;
 }
 
 
 /* =========================================
-   3. BUTTONS
+   3. BUTTONS AND TEXT INPUTS
 ========================================= */
 
 button {
@@ -124,6 +142,46 @@ button:disabled {
 button:focus-visible {
     outline: 2px solid var(--gold-light);
     outline-offset: 3px;
+}
+
+/* NEW: text box used for puzzle answers.
+   font-size 16px stops phones from zooming in when
+   the player taps the box. */
+input[type="text"] {
+    display: block;
+    width: 100%;
+    max-width: 380px;
+    margin: 20px auto 0;
+    padding: 14px 16px;
+
+    background: rgba(23, 20, 22, 0.85);
+    border: 1px solid var(--border-mid);
+    color: var(--gold-light);
+
+    font-family: var(--font-title);
+    font-size: 16px;
+    letter-spacing: 2px;
+    text-align: center;
+
+    transition: 0.3s ease;
+}
+
+input[type="text"]::placeholder {
+    color: var(--text-faint);
+    font-family: var(--font-body);
+    font-size: 15px;
+    letter-spacing: 1px;
+}
+
+input[type="text"]:focus {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 14px rgba(198, 163, 106, 0.3);
+}
+
+input[type="text"]:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
 }
 
 
@@ -402,6 +460,8 @@ h1 span {
 
 /* =========================================
    9. ROOM INVESTIGATION PANEL
+   Used by the old Study panel AND by the new
+   generic room panel (#roomPanel).
 ========================================= */
 
 .room-investigation {
@@ -510,7 +570,697 @@ h1 span {
 
 
 /* =========================================
-   12. ANIMATIONS
+   12. LOCKED AND UNLOCKED ROOM CARDS  (NEW)
+
+   Two ways to use these styles:
+   a) JavaScript adds the class "locked" or "unlocked"
+      to a .room-card (we will do this later).
+   b) Right now, before the new JavaScript exists, the
+      cards already change look automatically, because
+      a card whose button is disabled counts as locked.
+
+   Locked   = dashed border, dim text, no hover lift.
+   Unlocked = solid brighter border, glows gold on hover.
+========================================= */
+
+/* ---- LOCKED ---- */
+.room-card.locked {
+    border-style: dashed;
+    border-color: var(--border-dark);
+    background: rgba(33, 27, 29, 0.55);
+}
+
+/* Same look, but detected from the disabled button.
+   (Kept as a separate rule so that an older browser
+   that does not understand :has() ignores only this one.) */
+.room-card:has(button:disabled) {
+    border-style: dashed;
+    border-color: var(--border-dark);
+    background: rgba(33, 27, 29, 0.55);
+}
+
+.room-card.locked h3,
+.room-card.locked p {
+    color: var(--text-faint);
+}
+
+.room-card:has(button:disabled) h3,
+.room-card:has(button:disabled) p {
+    color: var(--text-faint);
+}
+
+/* Locked rooms do not lift or glow when hovered,
+   so they never look clickable. */
+.room-card.locked:hover {
+    transform: none;
+    box-shadow: none;
+    border-color: var(--border-dark);
+}
+
+.room-card:has(button:disabled):hover {
+    transform: none;
+    box-shadow: none;
+    border-color: var(--border-dark);
+}
+
+/* ---- UNLOCKED ---- */
+.room-card.unlocked {
+    border-color: var(--border-mid);
+}
+
+.room-card:has(button:not(:disabled)) {
+    border-color: var(--border-mid);
+}
+
+/* ---- CLEARED (every clue in the room has been found) ---- */
+.room-card.cleared {
+    border-color: var(--gold);
+    box-shadow: inset 0 0 0 1px rgba(198, 163, 106, 0.25);
+}
+
+/* Small helper text on a locked card, such as
+   "Find every clue in the Study to unlock this room." */
+.lock-hint {
+    font-size: 13px;
+    font-style: italic;
+    color: var(--text-faint);
+}
+
+
+/* =========================================
+   13. GENERIC ROOM PANEL  (NEW)
+   Object buttons and messages inside #roomPanel
+========================================= */
+
+/* Short intro text under the room name */
+#roomIntro {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* The list of inspectable objects */
+#objectList {
+    display: grid;
+    gap: 12px;
+
+    max-width: 560px;
+    margin: 28px auto 0;
+}
+
+/* One button per object. The text colours are inherited
+   from the button, so they stay readable on hover. */
+.object-button {
+    width: 100%;
+    margin-top: 0;
+    padding: 16px 20px;
+}
+
+/* Object name, for example "Eleanor's desk" */
+.object-name {
+    display: block;
+    font-size: 13px;
+    letter-spacing: 2px;
+}
+
+/* Short description under the name */
+.object-prompt {
+    display: block;
+    margin-top: 6px;
+
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-style: italic;
+    letter-spacing: 0;
+    line-height: 1.5;
+    opacity: 0.85;
+}
+
+/* An object the player has already inspected:
+   quieter, with a gold check, but still readable. */
+.object-button.inspected {
+    border-color: var(--border-mid);
+    color: var(--text-soft);
+}
+
+.object-button.inspected:disabled {
+    opacity: 0.75;
+    cursor: default;
+}
+
+.object-button.inspected .object-name::after {
+    content: "  \2713";   /* a check mark */
+    color: var(--gold);
+}
+
+/* Messages shown after an action (clue found, warnings).
+   An empty message box takes no space. */
+#roomResult {
+    max-width: 560px;
+    margin: 25px auto 0;
+    color: var(--gold-light);
+    line-height: 1.8;
+}
+
+#roomResult:empty,
+#puzzleResult:empty,
+#puzzleHintText:empty,
+#answerBox:empty,
+#endingText:empty,
+#endingTimeline:empty {
+    display: none;
+}
+
+/* Message colours. JavaScript adds one of these classes. */
+.message-success {
+    color: var(--success);
+}
+
+.message-error {
+    color: var(--danger);
+}
+
+.message-info {
+    color: var(--gold-light);
+}
+
+
+/* =========================================
+   14. PUZZLE AREA  (NEW)
+   The Key Box and The Hidden Panel
+========================================= */
+
+#puzzleArea {
+    max-width: 560px;
+    margin: 35px auto 0;
+    padding: 28px 25px;
+
+    background: rgba(23, 20, 22, 0.55);
+    border: 1px dashed var(--border-mid);
+}
+
+#puzzleTitle {
+    font-family: var(--font-title);
+    color: var(--gold);
+    letter-spacing: 3px;
+    margin-bottom: 15px;
+}
+
+/* The story text of the puzzle */
+#puzzleStory {
+    font-style: italic;
+}
+
+/* The question the player must answer stands out */
+#puzzleQuestion {
+    margin-top: 18px;
+    color: var(--gold-light);
+    font-weight: 700;
+}
+
+/* The two buttons (Submit and Hint) sit side by side */
+#puzzleArea > div {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+/* Hint text appears after the hint is used */
+#puzzleHintText {
+    margin-top: 20px;
+    padding: 12px 15px;
+
+    border-left: 2px solid var(--gold);
+    background: rgba(198, 163, 106, 0.07);
+
+    color: var(--gold-light);
+    font-style: italic;
+    text-align: left;
+}
+
+/* Success or failure message of the puzzle */
+#puzzleResult {
+    margin-top: 20px;
+    line-height: 1.8;
+}
+
+/* A puzzle that has been solved looks calm and finished */
+#puzzleArea.solved {
+    border-style: solid;
+    border-color: var(--success);
+}
+
+
+/* =========================================
+   15. CLUE DISPLAY  (NEW)
+   Used when a clue is found, and later inside the
+   inventory list. Works inside .info-panel li and
+   inside the room panel.
+========================================= */
+
+/* A clue shown as a small card (room panel) */
+.clue-card {
+    text-align: left;
+    padding: 15px 18px;
+
+    border-left: 3px solid var(--gold);
+    background: rgba(198, 163, 106, 0.07);
+}
+
+.clue-title {
+    display: block;
+
+    font-family: var(--font-title);
+    font-size: 14px;
+    letter-spacing: 1px;
+    color: var(--gold-light);
+}
+
+.clue-description {
+    display: block;
+    margin-top: 8px;
+
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--text-soft);
+}
+
+/* Small label showing the evidence type,
+   for example MOTIVE, PRESENCE, DECEPTION, FRAUD */
+.clue-tag {
+    display: inline-block;
+    margin-right: 8px;
+    padding: 2px 8px;
+
+    border: 1px solid var(--border-mid);
+    color: var(--text-faint);
+
+    font-family: var(--font-title);
+    font-size: 9px;
+    letter-spacing: 2px;
+    vertical-align: middle;
+}
+
+/* The strongest clues get a gold label */
+.clue-tag.key {
+    border-color: var(--gold);
+    color: var(--gold);
+}
+
+/* Message such as "You have not collected any clues yet." */
+.empty-note {
+    color: var(--text-faint);
+    font-style: italic;
+    text-align: center;
+    padding: 15px 0;
+}
+
+
+/* =========================================
+   16. SUSPECTS AND INTERROGATION  (NEW)
+   Suspect cards, profile, questions and answers
+========================================= */
+
+/* ---- The list of four suspects: two columns ---- */
+#suspectList {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+/* The accusation panel reuses the same grid */
+.suspect-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.suspect-card {
+    padding: 25px 20px;
+    text-align: center;
+
+    background: rgba(23, 20, 22, 0.55);
+    border: 1px solid var(--border-dark);
+
+    transition: 0.3s ease;
+}
+
+.suspect-card:hover {
+    border-color: var(--gold);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45);
+}
+
+/* Round badge with the suspect's initials, for example "RR" */
+.suspect-avatar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 14px;
+
+    border: 1px solid var(--gold);
+    border-radius: 50%;
+    background: var(--bg-burgundy);
+
+    font-family: var(--font-title);
+    font-size: 20px;
+    letter-spacing: 2px;
+    color: var(--gold);
+}
+
+/* A larger badge for the profile view */
+.suspect-avatar.large {
+    width: 84px;
+    height: 84px;
+    font-size: 26px;
+}
+
+.suspect-name {
+    font-family: var(--font-title);
+    font-size: 16px;
+    letter-spacing: 1px;
+    color: var(--gold-light);
+}
+
+.suspect-role {
+    margin-top: 4px;
+    font-size: 14px;
+    font-style: italic;
+    color: var(--text-soft);
+}
+
+/* Small progress line, for example "2 of 3 questions asked" */
+.suspect-status {
+    margin-top: 10px;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--text-faint);
+}
+
+.suspect-card button {
+    margin-top: 15px;
+}
+
+/* ---- One suspect's profile ---- */
+#suspectProfile {
+    text-align: center;
+    padding-bottom: 10px;
+}
+
+.suspect-age {
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: var(--text-faint);
+}
+
+.suspect-description {
+    max-width: 560px;
+    margin: 14px auto 0;
+    line-height: 1.8;
+    color: var(--text-soft);
+}
+
+/* The suspect's opening statement */
+.suspect-statement {
+    max-width: 560px;
+    margin: 18px auto 0;
+    padding: 10px 0 10px 18px;
+
+    border-left: 2px solid var(--gold);
+    color: var(--gold-light);
+    font-style: italic;
+    line-height: 1.7;
+    text-align: left;
+}
+
+/* ---- The list of interrogation questions ---- */
+#questionList {
+    display: grid;
+    gap: 12px;
+
+    max-width: 620px;
+    margin: 25px auto 0;
+}
+
+.question-button {
+    width: 100%;
+    margin-top: 0;
+    padding: 16px 18px;
+
+    text-align: left;
+
+    font-family: var(--font-body);
+    font-size: 15px;
+    letter-spacing: 0;
+    line-height: 1.6;
+}
+
+/* Small label above the question text, for example
+   "CONFRONTATION" or "COSTS 1 MOVE". Colours are inherited
+   so the label stays readable when the button is hovered. */
+.question-tag {
+    display: block;
+    margin-bottom: 5px;
+
+    font-family: var(--font-title);
+    font-size: 10px;
+    letter-spacing: 2px;
+    opacity: 0.8;
+}
+
+/* A confrontation question has a burgundy edge */
+.question-button.confrontation {
+    border-left: 4px solid var(--burgundy-bright);
+}
+
+/* A confrontation question that is not unlocked yet */
+.question-button.locked {
+    border-style: dashed;
+    border-color: var(--border-dark);
+    color: var(--text-faint);
+}
+
+/* A question that has already been asked */
+.question-button.asked {
+    border-color: var(--border-mid);
+    color: var(--text-soft);
+}
+
+.question-button.asked:disabled {
+    opacity: 0.75;
+    cursor: default;
+}
+
+/* ---- The suspect's answer ---- */
+#answerBox {
+    max-width: 620px;
+    margin: 25px auto 0;
+    padding: 22px 24px;
+
+    background: rgba(23, 20, 22, 0.6);
+    border-left: 3px solid var(--gold);
+
+    text-align: left;
+    line-height: 1.8;
+    color: var(--text-main);
+}
+
+.answer-speaker {
+    display: block;
+    margin-bottom: 8px;
+
+    font-family: var(--font-title);
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: var(--gold);
+}
+
+.answer-text {
+    display: block;
+    font-style: italic;
+}
+
+/* Badge shown when a question exposes a lie */
+.lie-exposed-badge {
+    display: inline-block;
+    margin-top: 14px;
+    padding: 4px 10px;
+
+    border: 1px solid var(--danger);
+    color: var(--danger);
+
+    font-family: var(--font-title);
+    font-size: 10px;
+    letter-spacing: 2px;
+}
+
+#backToSuspects {
+    margin-top: 25px;
+}
+
+
+/* =========================================
+   17. ACCUSATION PANEL  (NEW)
+========================================= */
+
+/* Warning that a wrong accusation ends the game */
+.accusation-warning {
+    margin-bottom: 22px;
+    padding: 14px 16px;
+
+    border: 1px solid var(--danger);
+    background: rgba(193, 102, 107, 0.08);
+
+    color: var(--text-soft);
+    text-align: center;
+    line-height: 1.7;
+}
+
+/* A suspect card the player can choose */
+.accuse-card {
+    cursor: pointer;
+}
+
+/* The suspect currently chosen for the accusation */
+.accuse-card.selected {
+    border-color: var(--gold);
+    background: rgba(57, 38, 41, 0.7);
+    box-shadow: 0 0 22px rgba(198, 163, 106, 0.25);
+}
+
+/* The final, serious button */
+.danger-button {
+    border-color: var(--danger);
+    color: var(--danger);
+}
+
+button.danger-button:hover:not(:disabled) {
+    background: var(--danger);
+    color: var(--bg-dark);
+    box-shadow: 0 0 18px rgba(193, 102, 107, 0.4);
+}
+
+/* Centres the confirm button under the suspect grid */
+.accusation-actions {
+    display: flex;
+    justify-content: center;
+}
+
+
+/* =========================================
+   18. ENDING SCREEN AND TIMELINE  (NEW)
+   The ending page already uses .story-page, so it
+   keeps the same gothic look. These styles add the
+   win/lose title colours and the murder timeline.
+========================================= */
+
+/* Title colour for each kind of ending */
+#endingTitle.ending-win {
+    color: var(--gold-light);
+    text-shadow: 0 0 22px rgba(198, 163, 106, 0.45);
+}
+
+#endingTitle.ending-lose {
+    color: var(--danger);
+}
+
+/* Final statistics line, for example score and moves left */
+.ending-summary {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.ending-summary .stat-box {
+    min-width: 120px;
+    padding: 15px 22px;
+}
+
+/* ---- The true murder timeline ---- */
+#endingTimeline {
+    width: 100%;
+    max-width: 650px;
+    text-align: left;
+}
+
+.timeline-heading {
+    margin-bottom: 20px;
+
+    font-family: var(--font-title);
+    font-size: 16px;
+    letter-spacing: 3px;
+    color: var(--gold);
+    text-align: center;
+}
+
+.timeline {
+    list-style: none;
+
+    margin-left: 6px;
+    padding-left: 26px;
+    border-left: 1px solid var(--border-mid);
+}
+
+.timeline-item {
+    position: relative;
+    padding-bottom: 20px;
+}
+
+/* The small dot on the timeline line */
+.timeline-item::before {
+    content: "";
+    position: absolute;
+    left: -32px;
+    top: 7px;
+
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+
+    background: var(--gold);
+    box-shadow: 0 0 10px rgba(198, 163, 106, 0.5);
+}
+
+/* The most important moment (the murder) has a red dot */
+.timeline-item.highlight::before {
+    background: var(--danger);
+    box-shadow: 0 0 10px rgba(193, 102, 107, 0.6);
+}
+
+.timeline-time {
+    display: block;
+
+    font-family: var(--font-title);
+    font-size: 13px;
+    letter-spacing: 2px;
+    color: var(--gold);
+}
+
+.timeline-event {
+    display: block;
+    margin-top: 3px;
+    line-height: 1.7;
+    color: var(--text-soft);
+}
+
+/* Lies that are revealed in the ending */
+.reveal-item {
+    margin-top: 12px;
+    padding: 10px 0 10px 16px;
+
+    border-left: 2px solid var(--burgundy-bright);
+    color: var(--text-soft);
+    line-height: 1.7;
+    text-align: left;
+}
+
+
+/* =========================================
+   19. ANIMATIONS
 ========================================= */
 
 /* Screens and panels fade in gently when they appear */
@@ -535,7 +1285,7 @@ h1 span {
 
 
 /* =========================================
-   13. RESPONSIVE DESIGN
+   20. RESPONSIVE DESIGN
 ========================================= */
 
 /* ---------- Tablets (up to 900px) ---------- */
@@ -609,11 +1359,68 @@ h1 span {
         letter-spacing: 1px;
     }
 
+    /* ---- NEW: phone layout for the added features ---- */
+
+    /* Suspect cards stack in one column */
+    #suspectList,
+    .suspect-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .suspect-card {
+        padding: 20px 15px;
+    }
+
+    /* Puzzle box uses the full width, buttons stack */
+    #puzzleArea {
+        padding: 22px 15px;
+    }
+
+    #puzzleArea > div {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    #puzzleArea > div button {
+        width: 100%;
+    }
+
+    .object-button {
+        padding: 14px 14px;
+    }
+
+    .question-button {
+        padding: 14px 14px;
+        font-size: 14px;
+    }
+
+    #answerBox {
+        padding: 18px 16px;
+    }
+
+    .accusation-actions button {
+        width: 100%;
+    }
+
+    /* Timeline sits a little closer to the edge */
+    .timeline {
+        padding-left: 22px;
+    }
+
+    .timeline-item::before {
+        left: -28px;
+    }
+
+    .ending-summary .stat-box {
+        min-width: 0;
+        flex: 1 1 40%;
+    }
+
 }
 
 
 /* =========================================
-   14. REDUCED MOTION
+   21. REDUCED MOTION
    If a person's device is set to reduce motion,
    we switch the animations off.
 ========================================= */
