@@ -1,5 +1,55 @@
+/* =========================================
+   DEAD BY MIDNIGHT - THE RAVENSCROFT CASE
+   style.css
 
-/* Basic page settings */
+   Table of contents:
+   1.  Colour and font variables
+   2.  Global settings
+   3.  Buttons
+   4.  Landing page
+   5.  Story page (also used for endings)
+   6.  Game dashboard
+   7.  Player statistics
+   8.  Room selection
+   9.  Room investigation panel
+   10. Footer menu buttons
+   11. Info panels (inventory, journal, suspects, accusation)
+   12. Animations
+   13. Responsive design (tablet and mobile)
+   14. Reduced motion (accessibility)
+========================================= */
+
+
+/* =========================================
+   1. COLOUR AND FONT VARIABLES
+   Change a colour here and it updates
+   everywhere in the game.
+========================================= */
+
+:root {
+    --bg-dark: #171416;        /* main charcoal background */
+    --bg-panel: #211b1d;       /* cards and panels */
+    --bg-burgundy: #392629;    /* burgundy glow */
+
+    --gold: #c6a36a;           /* antique gold */
+    --gold-light: #e5c68e;     /* light gold for highlights */
+
+    --text-main: #f3e9dc;      /* main text */
+    --text-soft: #b5a9a0;      /* softer text */
+    --text-faint: #81736e;     /* faint labels */
+
+    --border-dark: #51403b;    /* quiet borders */
+    --border-mid: #6b5141;     /* stronger borders */
+
+    --font-title: 'Cinzel', serif;
+    --font-body: 'Playfair Display', serif;
+}
+
+
+/* =========================================
+   2. GLOBAL SETTINGS
+========================================= */
+
 * {
     margin: 0;
     padding: 0;
@@ -7,40 +57,114 @@
 }
 
 body {
-    background: #171416;
-    color: #f3e9dc;
-    font-family: 'Playfair Display', serif;
+    background: var(--bg-dark);
+    color: var(--text-main);
+    font-family: var(--font-body);
+    line-height: 1.5;
 }
 
-/* Main landing page */
-.landing-page {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    padding: 20px;
+/* A soft dark vignette around the screen edges.
+   It sits above the page but cannot be clicked
+   (pointer-events: none), so buttons still work. */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    pointer-events: none;
 
     background:
         radial-gradient(
             ellipse at center,
-            #392629 0%,
-            #171416 75%
+            transparent 55%,
+            rgba(0, 0, 0, 0.55) 100%
         );
 }
 
-/* Small heading */
+/* Hide inactive screens and panels.
+   JavaScript adds or removes this class. */
+.hidden {
+    display: none !important;
+}
+
+
+/* =========================================
+   3. BUTTONS
+========================================= */
+
+button {
+    padding: 15px 30px;
+    margin-top: 20px;
+    min-height: 46px;   /* easy to tap on a phone */
+
+    background: transparent;
+    border: 1px solid var(--gold);
+    color: var(--gold-light);
+
+    font-family: var(--font-title);
+    font-size: 12px;
+    letter-spacing: 2px;
+
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+button:hover:not(:disabled) {
+    background: var(--gold);
+    color: var(--bg-dark);
+    box-shadow: 0 0 18px rgba(198, 163, 106, 0.35);
+}
+
+button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* Visible outline when using the keyboard (Tab key) */
+button:focus-visible {
+    outline: 2px solid var(--gold-light);
+    outline-offset: 3px;
+}
+
+
+/* =========================================
+   4. LANDING PAGE
+========================================= */
+
+.landing-page {
+    position: relative;   /* lets .footer-text sit inside this page */
+    min-height: 100vh;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    text-align: center;
+    padding: 20px 20px 80px;
+
+    /* Burgundy glow in the centre fading to charcoal */
+    background:
+        radial-gradient(
+            ellipse at center,
+            var(--bg-burgundy) 0%,
+            var(--bg-dark) 75%
+        );
+
+    animation: fadeIn 1.2s ease;
+}
+
+/* Small heading above the title */
 .subtitle {
-    color: #c6a36a;
+    color: var(--gold);
     letter-spacing: 5px;
     font-size: 13px;
     margin-bottom: 25px;
 }
 
-/* Main title */
+/* Main game title */
 h1 {
-    font-family: 'Cinzel', serif;
+    font-family: var(--font-title);
     font-size: clamp(45px, 9vw, 100px);
     line-height: 1.2;
     letter-spacing: 5px;
@@ -48,54 +172,39 @@ h1 {
 
 h1 span {
     display: block;
-    color: #c6a36a;
+    color: var(--gold);
+
+    /* Soft flickering candle-like glow */
+    animation: candleGlow 4s ease-in-out infinite;
 }
 
-/* Tagline */
+/* Landing page description */
 .tagline {
-    color: #b5a9a0;
+    color: var(--text-soft);
     margin-top: 25px;
     letter-spacing: 2px;
     font-size: 14px;
 }
 
-/* Start button */
-button {
-    margin-top: 55px;
-    padding: 17px 35px;
-    background: transparent;
-    border: 1px solid #c6a36a;
-    color: #e5c68e;
-    font-family: 'Cinzel', serif;
-    letter-spacing: 2px;
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-button:hover {
-    background: #c6a36a;
-    color: #171416;
-}
-
-/* Footer */
+/* Footer text at the bottom of the landing page */
 .footer-text {
     position: absolute;
     bottom: 30px;
-    color: #81736e;
+
+    color: var(--text-faint);
     font-size: 11px;
     letter-spacing: 3px;
 }
 
-/* Hide screens when they are not active */
-.hidden {
-    display: none !important;
-}
 
-/* Story introduction */
+/* =========================================
+   5. STORY PAGE
+   The same styles are reused by the
+   ending screen (endingPage).
+========================================= */
+
 .story-page {
     min-height: 100vh;
-    background: #171416;
-    color: #f3e9dc;
 
     display: flex;
     flex-direction: column;
@@ -105,135 +214,343 @@ button:hover {
     text-align: center;
     padding: 40px 20px;
     gap: 25px;
+
+    background:
+        radial-gradient(
+            ellipse at top,
+            #271c1f 0%,
+            var(--bg-dark) 70%
+        );
+
+    animation: fadeIn 0.9s ease;
 }
 
+/* Story heading */
 .story-page h2 {
-    font-family: 'Cinzel', serif;
-    color: #c6a36a;
+    font-family: var(--font-title);
+    color: var(--gold);
     font-size: clamp(25px, 5vw, 45px);
 }
 
+/* Story paragraphs */
 .story-page p {
     max-width: 600px;
     line-height: 1.8;
-    color: #b5a9a0;
+    color: var(--text-soft);
 }
 
+/* The small label above headings keeps its gold colour */
+.story-page p.subtitle {
+    color: var(--gold);
+    margin-bottom: 0;
+}
+
+/* Important dialogue (Eleanor's letter) */
 .story-page blockquote {
-    color: #e5c68e;
+    color: var(--gold-light);
     font-style: italic;
     font-size: 20px;
     max-width: 550px;
+    line-height: 1.6;
+
+    padding: 10px 0 10px 20px;
+    border-left: 2px solid var(--gold);
+    text-align: left;
 }
 
-/* Main game dashboard */
+/* Text area of the ending screen (filled by JavaScript later) */
+#endingText {
+    max-width: 650px;
+    line-height: 1.8;
+    color: var(--text-soft);
+}
+
+
+/* =========================================
+   6. GAME DASHBOARD
+========================================= */
+
 .game-page {
     min-height: 100vh;
     padding: 40px 8%;
-    background: #171416;
-    color: #f3e9dc;
+
+    background:
+        radial-gradient(
+            ellipse at top,
+            #261c1f 0%,
+            var(--bg-dark) 60%
+        );
+    color: var(--text-main);
+
+    animation: fadeIn 0.9s ease;
 }
 
+/* Dashboard heading */
 .game-header {
     text-align: center;
-    border-bottom: 1px solid #6b5141;
+    border-bottom: 1px solid var(--border-mid);
     padding-bottom: 25px;
 }
 
 .game-header h2 {
-    color: #c6a36a;
-    font-family: 'Cinzel', serif;
+    color: var(--gold);
+    font-family: var(--font-title);
     letter-spacing: 4px;
 }
 
 .game-header p {
-    color: #81736e;
+    color: var(--text-faint);
     margin-top: 10px;
     letter-spacing: 3px;
     font-size: 11px;
 }
 
-/* Statistics */
+
+/* =========================================
+   7. PLAYER STATISTICS
+   Four boxes: TIME, MOVES, LIVES, SCORE
+========================================= */
+
 .stats {
     display: flex;
     justify-content: center;
     gap: 20px;
+
     margin: 40px 0;
     flex-wrap: wrap;
 }
 
 .stat-box {
-    border: 1px solid #6b5141;
+    border: 1px solid var(--border-mid);
+    background: rgba(33, 27, 29, 0.6);
     padding: 20px 35px;
+
     text-align: center;
     min-width: 140px;
 }
 
 .stat-box span {
-    color: #b5a9a0;
+    color: var(--text-soft);
     font-size: 11px;
     letter-spacing: 2px;
 }
 
 .stat-box h3 {
-    color: #c6a36a;
+    color: var(--gold);
+    font-family: var(--font-title);
     font-size: 30px;
     margin-top: 10px;
 }
 
-/* Room section */
+/* The clock gets a slightly smaller size so "10:30 PM" fits well */
+#clock {
+    font-size: 24px;
+    padding-top: 4px;
+}
+
+
+/* =========================================
+   8. ROOM SELECTION
+========================================= */
+
 .section-title {
     text-align: center;
-    color: #c6a36a;
-    font-family: 'Cinzel', serif;
+
+    color: var(--gold);
+    font-family: var(--font-title);
+
     margin: 45px 0 30px;
     letter-spacing: 3px;
 }
 
+/* Two-column room layout */
 .room-container {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 20px;
 }
 
+/* Individual room cards */
 .room-card {
-    border: 1px solid #51403b;
-    background: #211b1d;
+    border: 1px solid var(--border-dark);
+    background: var(--bg-panel);
+
     padding: 35px 25px;
     text-align: center;
+
+    transition: 0.3s ease;
+}
+
+.room-card:hover {
+    border-color: var(--gold);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
 }
 
 .room-card h3 {
-    font-family: 'Cinzel', serif;
-    color: #e5c68e;
+    font-family: var(--font-title);
+    color: var(--gold-light);
     margin-bottom: 15px;
 }
 
 .room-card p {
-    color: #b5a9a0;
+    color: var(--text-soft);
     margin-bottom: 15px;
     line-height: 1.6;
 }
 
-.room-card button {
-    margin-top: 15px;
+
+/* =========================================
+   9. ROOM INVESTIGATION PANEL
+========================================= */
+
+.room-investigation {
+    margin-top: 35px;
+    padding: 35px;
+
+    text-align: center;
+
+    background: var(--bg-panel);
+    border: 1px solid var(--gold);
+    box-shadow: 0 0 30px rgba(198, 163, 106, 0.12);
+
+    animation: fadeIn 0.5s ease;
 }
 
-button:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
+.room-investigation h2 {
+    color: var(--gold);
+    font-family: var(--font-title);
+    margin-bottom: 20px;
 }
 
-/* Bottom navigation */
+.room-investigation p {
+    color: var(--text-soft);
+    line-height: 1.8;
+}
+
+/* Message shown when a clue is found */
+#clueResult {
+    color: var(--gold-light);
+    margin: 25px 0;
+    line-height: 1.8;
+}
+
+
+/* =========================================
+   10. FOOTER MENU BUTTONS
+========================================= */
+
 .game-footer {
     display: flex;
     justify-content: center;
+
     flex-wrap: wrap;
     gap: 15px;
+
     margin-top: 45px;
 }
 
+/* Buttons already have margin-top, so we remove it
+   inside the footer because "gap" handles the spacing. */
+.game-footer button {
+    margin-top: 0;
+}
+
+
+/* =========================================
+   11. INFO PANELS
+   Inventory, Journal, Suspects, Accusation
+========================================= */
+
+.info-panel {
+    background: var(--bg-panel);
+    border: 1px solid var(--gold);
+    box-shadow: 0 0 30px rgba(198, 163, 106, 0.12);
+
+    padding: 30px;
+    margin-top: 25px;
+
+    text-align: center;
+
+    animation: fadeIn 0.5s ease;
+}
+
+.info-panel h2 {
+    color: var(--gold);
+    font-family: var(--font-title);
+    margin-bottom: 20px;
+}
+
+.info-panel p {
+    color: var(--text-soft);
+    line-height: 1.7;
+    margin-bottom: 15px;
+}
+
+/* Evidence and journal lists */
+.info-panel ul {
+    list-style: none;
+    color: var(--gold-light);
+    line-height: 1.8;
+    text-align: left;
+}
+
+.info-panel li {
+    border-bottom: 1px solid var(--border-dark);
+    padding: 12px 8px;
+}
+
+/* Containers that JavaScript will fill later */
+#suspectList,
+#accusationContent {
+    color: var(--text-soft);
+    line-height: 1.8;
+    text-align: left;
+}
+
+
+/* =========================================
+   12. ANIMATIONS
+========================================= */
+
+/* Screens and panels fade in gently when they appear */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Slow candle-like glow on the word MIDNIGHT */
+@keyframes candleGlow {
+    0%, 100% {
+        text-shadow: 0 0 12px rgba(198, 163, 106, 0.25);
+    }
+    50% {
+        text-shadow: 0 0 28px rgba(198, 163, 106, 0.55);
+    }
+}
+
+
+/* =========================================
+   13. RESPONSIVE DESIGN
+========================================= */
+
+/* ---------- Tablets (up to 900px) ---------- */
+@media (max-width: 900px) {
+
+    .game-page {
+        padding: 35px 5%;
+    }
+
+}
+
+/* ---------- Mobile phones (up to 600px) ---------- */
 @media (max-width: 600px) {
+
+    /* Rooms stack in one column */
     .room-container {
         grid-template-columns: 1fr;
     }
@@ -241,56 +558,71 @@ button:disabled {
     .game-page {
         padding: 30px 5%;
     }
-}
-/* Room investigation panel */
 
-.room-investigation {
-    margin-top: 35px;
-    padding: 35px;
-    text-align: center;
-    background: #211b1d;
-    border: 1px solid #c6a36a;
+    .game-header h2 {
+        font-size: 19px;
+    }
+
+    /* Stats become a neat 2 x 2 grid */
+    .stats {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
+    .stat-box {
+        min-width: 0;
+        padding: 15px 10px;
+    }
+
+    .stat-box h3 {
+        font-size: 26px;
+    }
+
+    #clock {
+        font-size: 21px;
+    }
+
+    .story-page {
+        padding: 30px 18px;
+    }
+
+    .story-page blockquote {
+        font-size: 18px;
+    }
+
+    .room-investigation,
+    .info-panel {
+        padding: 25px 15px;
+    }
+
+    /* Menu buttons become a 2 x 2 grid */
+    .game-footer {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
+    .game-footer button {
+        padding: 14px 8px;
+        font-size: 11px;
+        letter-spacing: 1px;
+    }
+
 }
 
-.room-investigation h2 {
-    color: #c6a36a;
-    font-family: 'Cinzel', serif;
-    margin-bottom: 20px;
-}
 
-.room-investigation p {
-    color: #b5a9a0;
-    line-height: 1.8;
-}
+/* =========================================
+   14. REDUCED MOTION
+   If a person's device is set to reduce motion,
+   we switch the animations off.
+========================================= */
 
-#clueResult {
-    color: #e5c68e;
-    margin: 25px 0;
-    line-height: 1.8;
-}
-/* Inventory and journal panels */
+@media (prefers-reduced-motion: reduce) {
 
-.info-panel {
-    background: #211b1d;
-    border: 1px solid #c6a36a;
-    padding: 30px;
-    margin-top: 25px;
-    text-align: center;
-}
+    * {
+        animation: none !important;
+        transition: none !important;
+    }
 
-.info-panel h2 {
-    color: #c6a36a;
-    font-family: 'Cinzel', serif;
-    margin-bottom: 20px;
-}
-
-.info-panel ul {
-    list-style: none;
-    color: #e5c68e;
-    line-height: 2.5;
-}
-
-.info-panel li {
-    border-bottom: 1px solid #51403b;
-    padding: 8px;
 }

@@ -1,11 +1,83 @@
 
-const startButton = document.getElementById("startButton");
+/* =========================================
+   1. GAME VARIABLES
+========================================= */
 
+// Initial game statistics
+let moves = 40;
+let lives = 3;
+let score = 0;
+
+// Store collected clues
+let inventory = [];
+
+// Store investigation history
+let journal = [];
+
+// Track whether the Study clue has been collected
+let studyClueFound = false;
+
+
+/* =========================================
+   2. GET HTML ELEMENTS
+========================================= */
+
+// Main screens
 const landingPage = document.getElementById("landingPage");
-
 const storyPage = document.getElementById("storyPage");
+const gamePage = document.getElementById("gamePage");
 
-// Open the story when the player clicks Start
+// Navigation buttons
+const startButton = document.getElementById("startButton");
+const enterMansion = document.getElementById("enterMansion");
+
+// Room elements
+const exploreStudy = document.getElementById("exploreStudy");
+const roomContainer = document.getElementById("roomContainer");
+const studyPanel = document.getElementById("studyPanel");
+
+const inspectDesk = document.getElementById("inspectDesk");
+const clueResult = document.getElementById("clueResult");
+const backToRooms = document.getElementById("backToRooms");
+
+// Statistics
+const movesDisplay = document.getElementById("moves");
+const livesDisplay = document.getElementById("lives");
+const scoreDisplay = document.getElementById("score");
+
+// Inventory elements
+const inventoryButton = document.getElementById("inventoryButton");
+const inventoryPanel = document.getElementById("inventoryPanel");
+const inventoryList = document.getElementById("inventoryList");
+const closeInventory = document.getElementById("closeInventory");
+
+// Journal elements
+const journalButton = document.getElementById("journalButton");
+const journalPanel = document.getElementById("journalPanel");
+const journalList = document.getElementById("journalList");
+const closeJournal = document.getElementById("closeJournal");
+
+
+/* =========================================
+   3. UPDATE GAME STATISTICS
+========================================= */
+
+function updateStats() {
+
+    movesDisplay.textContent = moves;
+
+    livesDisplay.textContent = lives;
+
+    scoreDisplay.textContent = score;
+
+}
+
+
+/* =========================================
+   4. LANDING PAGE NAVIGATION
+========================================= */
+
+// Open story introduction
 startButton.addEventListener("click", function() {
 
     landingPage.classList.add("hidden");
@@ -14,104 +86,121 @@ startButton.addEventListener("click", function() {
 
 });
 
-// Get the mansion dashboard
-const gamePage = document.getElementById("gamePage");
 
-// Get the Enter Mansion button
-const enterMansion = document.getElementById("enterMansion");
-
-// Open the game dashboard
+// Enter the mansion
 enterMansion.addEventListener("click", function() {
 
     storyPage.classList.add("hidden");
 
     gamePage.classList.remove("hidden");
 
-});// Store collected items and investigation history
-let inventory = [];
-let journal = [];
+    updateStats();
 
+});
+
+
+/* =========================================
+   5. STUDY EXPLORATION
+========================================= */
+
+// Open the Study
+exploreStudy.addEventListener("click", function() {
+
+    roomContainer.classList.add("hidden");
+
+    studyPanel.classList.remove("hidden");
+
+});
+
+
+// Inspect the desk and discover a clue
 inspectDesk.addEventListener("click", function() {
 
+    // Check whether the player has moves remaining
+    if (moves <= 0) {
+
+        clueResult.textContent =
+            "You have no moves remaining!";
+
+        return;
+
+    }
+
+    // Prevent collecting the same clue twice
+    if (studyClueFound) {
+
+        clueResult.textContent =
+            "You have already collected this clue.";
+
+        return;
+
+    }
+
+    // Clue discovered
     const clue = "Torn letter mentioning Eleanor's death";
 
     // Add clue to inventory
     inventory.push(clue);
 
-    // Record discovery in journal
+    // Add discovery to journal
     journal.push("Discovered a torn letter in the Study.");
 
+    // Update game statistics
+    moves--;
+
+    score += 10;
+
+    // Mark the clue as collected
+    studyClueFound = true;
+
+    // Display discovery message
     clueResult.textContent =
         "CLUE FOUND: " + clue;
 
-    inspectDesk.disabled = true;
+    // Update dashboard
+    updateStats();
 
-});
-// Get the Study elements
-const exploreStudy = document.getElementById("exploreStudy");
-const studyPanel = document.getElementById("studyPanel");
-
-const inspectDesk = document.getElementById("inspectDesk");
-const clueResult = document.getElementById("clueResult");
-
-const backToRooms = document.getElementById("backToRooms");
-
-// Open the Study
-exploreStudy.addEventListener("click", function() {
-
-    studyPanel.classList.remove("hidden");
-
-    document.querySelector(".room-container").classList.add("hidden");
-
-});
-
-// Inspect the desk and discover a clue
-inspectDesk.addEventListener("click", function() {
-
-    clueResult.textContent =
-        "CLUE FOUND: A torn letter mentioning Eleanor's death ten years ago.";
-
+    // Disable inspection button
     inspectDesk.disabled = true;
 
 });
 
-// Return to the room selection
+
+// Return to room selection
 backToRooms.addEventListener("click", function() {
 
     studyPanel.classList.add("hidden");
 
-    document.querySelector(".room-container").classList.remove("hidden");
+    roomContainer.classList.remove("hidden");
 
 });
-// Get inventory elements
-const inventoryButton = document.getElementById("inventoryButton");
-const inventoryPanel = document.getElementById("inventoryPanel");
-const inventoryList = document.getElementById("inventoryList");
-const closeInventory = document.getElementById("closeInventory");
 
-// Get journal elements
-const journalButton = document.getElementById("journalButton");
-const journalPanel = document.getElementById("journalPanel");
-const journalList = document.getElementById("journalList");
-const closeJournal = document.getElementById("closeJournal");
 
-// Display inventory
+/* =========================================
+   6. INVENTORY FUNCTIONALITY
+========================================= */
+
+// Display collected clues
 inventoryButton.addEventListener("click", function() {
 
+    // Clear previous list
     inventoryList.innerHTML = "";
 
+    // Display each collected item
     inventory.forEach(function(item) {
 
-        const li = document.createElement("li");
-        li.textContent = item;
+        const listItem = document.createElement("li");
 
-        inventoryList.appendChild(li);
+        listItem.textContent = item;
+
+        inventoryList.appendChild(listItem);
 
     });
 
     inventoryPanel.classList.remove("hidden");
 
 });
+
 
 // Close inventory
 closeInventory.addEventListener("click", function() {
@@ -120,17 +209,25 @@ closeInventory.addEventListener("click", function() {
 
 });
 
-// Display journal
+
+/* =========================================
+   7. DETECTIVE JOURNAL
+========================================= */
+
+// Display investigation history
 journalButton.addEventListener("click", function() {
 
+    // Clear previous list
     journalList.innerHTML = "";
 
+    // Display each journal entry
     journal.forEach(function(entry) {
 
-        const li = document.createElement("li");
-        li.textContent = entry;
+        const listItem = document.createElement("li");
 
-        journalList.appendChild(li);
+        listItem.textContent = entry;
+
+        journalList.appendChild(listItem);
 
     });
 
@@ -138,9 +235,20 @@ journalButton.addEventListener("click", function() {
 
 });
 
+
 // Close journal
 closeJournal.addEventListener("click", function() {
 
     journalPanel.classList.add("hidden");
 
 });
+
+
+/* =========================================
+   8. INITIALIZE GAME
+========================================= */
+
+// Display initial statistics
+updateStats();
+
+console.log("Dead by Midnight game loaded successfully!");
