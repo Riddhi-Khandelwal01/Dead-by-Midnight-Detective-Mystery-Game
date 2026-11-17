@@ -1,21 +1,21 @@
 
 package com.deadbymidnight.backend.model;
 
+// Stores and manages the player's game statistics.
 public class Player {
 
-    // Player's game statistics
     private int moves;
     private int lives;
     private int score;
 
-    // Constructor: initializes the player's statistics
+    // Initializes the player with default game values.
     public Player() {
         this.moves = 40;
         this.lives = 3;
         this.score = 0;
     }
 
-    // Getters
+    // Getter methods to access player statistics.
     public int getMoves() {
         return moves;
     }
@@ -28,21 +28,21 @@ public class Player {
         return score;
     }
 
-    // Use one move
+    // Reduces the available moves by one.
     public void useMove() {
         if (moves > 0) {
             moves--;
         }
     }
 
-    // Lose one life
+    // Reduces the player's lives by one.
     public void loseLife() {
         if (lives > 0) {
             lives--;
         }
     }
 
-    // Add points to the score
+    // Adds points to the player's score.
     public void addScore(int points) {
         if (points > 0) {
             score += points;

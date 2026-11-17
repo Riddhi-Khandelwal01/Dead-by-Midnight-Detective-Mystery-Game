@@ -4,6 +4,7 @@ package com.deadbymidnight.backend.model;
 import java.util.ArrayList;
 import java.util.List;
 
+// Manages the overall progress and rules of the game.
 public class GameState {
 
     private Player player;
@@ -15,26 +16,25 @@ public class GameState {
     private String currentPeriod;
 
     private List<String> collectedClues;
-
-    // Stores puzzles that have already been solved
     private List<String> solvedPuzzles;
 
-    // Constructor
+    // Initializes a new game.
     public GameState() {
 
-        this.player = new Player();
+        player = new Player();
 
-        this.currentRoom = "Study";
+        currentRoom = "Study";
 
-        this.currentHour = 10;
-        this.currentMinute = 30;
-        this.currentPeriod = "PM";
+        // The detective arrives at 10:30 PM.
+        currentHour = 10;
+        currentMinute = 30;
+        currentPeriod = "PM";
 
-        this.collectedClues = new ArrayList<>();
-        this.solvedPuzzles = new ArrayList<>();
+        collectedClues = new ArrayList<>();
+        solvedPuzzles = new ArrayList<>();
     }
 
-    // Getters
+    // Getter methods.
     public Player getPlayer() {
         return player;
     }
@@ -63,21 +63,15 @@ public class GameState {
         return solvedPuzzles;
     }
 
-    // Change current room
-    public void setCurrentRoom(String currentRoom) {
-        this.currentRoom = currentRoom;
-    }
-
-    // Inspect a clue for the first time
+    // Inspects a clue and updates the player's progress.
     public boolean inspectClue(String clue) {
 
-        if (clue == null || clue.isBlank()) {
+        if (clue == null || clue.trim().isEmpty()) {
             return false;
         }
 
-        String cleanClue = clue.trim();
-
-        if (collectedClues.contains(cleanClue)) {
+        // Prevent collecting the same clue twice.
+        if (collectedClues.contains(clue)) {
             return false;
         }
 
@@ -85,72 +79,60 @@ public class GameState {
             return false;
         }
 
+        collectedClues.add(clue);
+
         player.useMove();
         player.addScore(10);
 
-        collectedClues.add(cleanClue);
-
-        advanceTime();
+        advanceTime(2);
 
         return true;
     }
 
-    // Check whether a room is unlocked
+    // Checks whether a particular room is unlocked.
     public boolean isRoomUnlocked(String room) {
 
         if (room == null) {
             return false;
         }
 
-        if ("Study".equalsIgnoreCase(room)) {
-            return true;
+        switch (room.toLowerCase()) {
+
+            case "study":
+                return true;
+
+            case "library":
+                return collectedClues.contains("Torn Letter")
+                        && collectedClues.contains("Broken Cufflink")
+                        && collectedClues.contains(
+                                "Partially Burned Business Document");
+
+            case "laboratory":
+                return solvedPuzzles.contains("Key Box");
+
+            case "secret room":
+                return solvedPuzzles.contains("Hidden Panel");
+
+            default:
+                return false;
         }
-
-        if ("Library".equalsIgnoreCase(room)) {
-
-            return collectedClues.contains("Torn Letter")
-                    && collectedClues.contains("Broken Cufflink")
-                    && collectedClues.contains(
-                            "Partially Burned Business Document");
-        }
-
-        if ("Laboratory".equalsIgnoreCase(room)) {
-            return solvedPuzzles.contains("Key Box");
-        }
-
-        return false;
     }
 
-    // Enter an unlocked room
+    // Allows the player to enter an unlocked room.
     public boolean enterRoom(String room) {
-
-        if (room == null || room.isBlank()) {
-            return false;
-        }
 
         if (!isRoomUnlocked(room)) {
             return false;
         }
 
-        setCurrentRoom(room);
-
+        currentRoom = room;
         return true;
     }
 
-    // Solve the Library Key Box puzzle
+    // Checks the player's answer to a puzzle.
     public boolean solvePuzzle(String puzzleName, String answer) {
 
         if (puzzleName == null || answer == null) {
-            return false;
-        }
-
-        // Puzzle can only be solved inside the Library
-        if (!currentRoom.equalsIgnoreCase("Library")) {
-            return false;
-        }
-
-        // Prevent solving the same puzzle twice
-        if (solvedPuzzles.contains(puzzleName)) {
             return false;
         }
 
@@ -158,48 +140,70 @@ public class GameState {
             return false;
         }
 
-        if ("Key Box".equalsIgnoreCase(puzzleName.trim())) {
-
-            String cleanAnswer = answer.trim();
-
-            // Accept both 12 and MIDNIGHT
-            if (cleanAnswer.equalsIgnoreCase("12")
-                    || cleanAnswer.equalsIgnoreCase("MIDNIGHT")) {
-
-                solvedPuzzles.add("Key Box");
-
-                player.addScore(25);
-
-                return true;
-            }
-
-            // Wrong answer costs one life
-            player.loseLife();
-
+        // Prevent solving the same puzzle more than once.
+        if (solvedPuzzles.contains(puzzleName)) {
             return false;
         }
+
+        boolean correct = false;
+
+        // Library puzzle: Key Box.
+        if (currentRoom.equalsIgnoreCase("Library")
+                && puzzleName.equalsIgnoreCase("Key Box")) {
+
+            correct = answer.equalsIgnoreCase("12")
+                    || answer.equalsIgnoreCase("MIDNIGHT");
+        }
+
+        // Laboratory puzzle: Hidden Panel.
+        else if (currentRoom.equalsIgnoreCase("Laboratory")
+                && puzzleName.equalsIgnoreCase("Hidden Panel")) {
+
+            correct = answer.equalsIgnoreCase("E.W.");
+        }
+
+        if (correct) {
+
+            solvedPuzzles.add(puzzleName);
+            player.addScore(25);
+
+            return true;
+        }
+
+        // An incorrect puzzle answer costs one life.
+        player.loseLife();
 
         return false;
     }
 
-    // Advance the game clock by two minutes
-    public void advanceTime() {
+    // Advances the game clock by the given number of minutes.
+    public void advanceTime(int minutes) {
 
-        currentMinute += 2;
+        int totalMinutes = currentHour * 60 + currentMinute;
 
-        if (currentMinute >= 60) {
-            currentHour++;
-            currentMinute -= 60;
+        // Convert PM time into 24-hour format.
+        if (currentPeriod.equals("PM") && currentHour != 12) {
+            totalMinutes += 12 * 60;
         }
 
-        if (currentHour > 12) {
-            currentHour = 1;
-
-            if (currentPeriod.equals("AM")) {
-                currentPeriod = "PM";
-            } else {
-                currentPeriod = "AM";
-            }
+        // Convert 12 AM to 00 hours.
+        if (currentPeriod.equals("AM") && currentHour == 12) {
+            totalMinutes -= 12 * 60;
         }
+
+        totalMinutes += minutes;
+
+        // Convert back to a 12-hour clock.
+        totalMinutes %= 24 * 60;
+
+        currentHour = (totalMinutes / 60) % 12;
+
+        if (currentHour == 0) {
+            currentHour = 12;
+        }
+
+        currentMinute = totalMinutes % 60;
+
+        currentPeriod = totalMinutes >= 12 * 60 ? "PM" : "AM";
     }
 }

@@ -64,4 +64,27 @@ public class GameStateController {
 
         return response;
     }
+    
+    // Solve a puzzle
+    @PostMapping("/api/game/puzzle")
+    public Map<String, Object> solvePuzzle(
+            @RequestBody Map<String, String> request) {
+
+        String puzzleName = request.get("puzzleName");
+        String answer = request.get("answer");
+
+        boolean success = gameState.solvePuzzle(puzzleName, answer);
+
+        Map<String, Object> response = new HashMap<>();
+
+        response.put("success", success);
+        response.put("message", success
+                ? "Puzzle solved successfully!"
+                : "Incorrect answer or puzzle cannot be solved.");
+
+        response.put("gameState", gameState);
+
+        return response;
+    }
+
 }
