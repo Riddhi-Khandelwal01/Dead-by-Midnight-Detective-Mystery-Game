@@ -1,6 +1,0 @@
-com\deadbymidnight\backend\BackendApplication.class
-com\deadbymidnight\backend\controller\GameController.class
-com\deadbymidnight\backend\controller\GameStateController.class
-com\deadbymidnight\backend\model\GameState.class
-com\deadbymidnight\backend\model\GameInfo.class
-com\deadbymidnight\backend\model\Player.class
